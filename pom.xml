@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.0.0-SNAPSHOT</version>
+		<relativePath /> <!-- lookup parent from repository -->
+	</parent>
+
+	<groupId>com.vidya</groupId>
+	<artifactId>build-gate</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>build-gate</name>
+	<description>Simple build server</description>
+
+	<properties>
+		<java.version>17</java.version>
+	</properties>
+
+	<developers>
+		<developer>
+			<name>Vidya Sagar Gupta</name>
+			<url>https://www.linkedin.com/in/vidyasagar-gupta/</url>
+		</developer>
+	</developers>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+
+		<!-- dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency -->
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+			<!-- exclusions>
+				<exclusion>
+					<groupId>io.micrometer</groupId>
+					<artifactId>micrometer-observation</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.micrometer</groupId>
+					<artifactId>micrometer-core</artifactId>
+				</exclusion>
+			</exclusions -->
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit</artifactId>
+			<version>6.3.0.202209071007-r</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.junit.vintage</groupId>
+					<artifactId>junit-vintage-engine</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+	<repositories>
+		<repository>
+			<id>spring-milestones</id>
+			<name>Spring Milestones</name>
+			<url>https://repo.spring.io/milestone</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>spring-snapshots</id>
+			<name>Spring Snapshots</name>
+			<url>https://repo.spring.io/snapshot</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+		</repository>
+	</repositories>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>spring-milestones</id>
+			<name>Spring Milestones</name>
+			<url>https://repo.spring.io/milestone</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</pluginRepository>
+		<pluginRepository>
+			<id>spring-snapshots</id>
+			<name>Spring Snapshots</name>
+			<url>https://repo.spring.io/snapshot</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+		</pluginRepository>
+	</pluginRepositories>
+
+</project>
