@@ -1,4 +1,4 @@
-package com.vidya.buildgate.conf;
+package com.vidya.buildgate.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;

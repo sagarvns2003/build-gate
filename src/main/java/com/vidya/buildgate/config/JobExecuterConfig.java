@@ -1,4 +1,4 @@
-package com.vidya.buildgate.conf;
+package com.vidya.buildgate.config;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
