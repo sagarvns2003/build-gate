@@ -4,26 +4,48 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.0.0</version>
+		<version>3.0.6</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 
-	<groupId>com.vidya</groupId>
+	<groupId>io.github.sagarvns2003</groupId>
 	<artifactId>build-gate</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>build-gate</name>
-	<description>Simple build server</description>
+	<version>0.0.1</version>
+
+	<name>${project.artifactId}</name>
+	<description>Simple self hosted build server.</description>
+	<url>https://github.com/sagarvns2003/build-gate</url>
 
 	<properties>
 		<java.version>17</java.version>
+		<maven.compiler.source>${java.version}</maven.compiler.source>
+		<maven.compiler.target>${java.version}</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<node.version>v18.7.0</node.version>
+		<npm.version>9.6.0</npm.version>
+		<frontend-maven-plugin.version>1.12.1</frontend-maven-plugin.version>
 	</properties>
+
+	<scm>
+		<url>https://github.com/sagarvns2003/build-gate</url>
+		<connection>scm:git:https://github.com/sagarvns2003/build-gate</connection>
+		<developerConnection>scm:git:https://github.com/sagarvns2003/build-gate</developerConnection>
+	</scm>
 
 	<developers>
 		<developer>
 			<name>Vidya Sagar Gupta</name>
+			<email>v3sagar@gmail.com</email>
 			<url>https://www.linkedin.com/in/vidyasagar-gupta/</url>
 		</developer>
 	</developers>
+
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
 
 	<dependencies>
 		<dependency>
@@ -115,11 +137,99 @@
 	</dependencies>
 
 	<build>
+		<resources>
+			<resource>
+				<directory>${project.basedir}/ui/build</directory>
+				<filtering>false</filtering>
+				<targetPath>public/</targetPath>
+			</resource>
+			<resource>
+				<directory>${project.basedir}/src/main/resources</directory>
+				<filtering>false</filtering>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>build-info</id>
+						<goals>
+							<goal>build-info</goal>
+						</goals>
+						<configuration>
+							<additionalProperties>
+								<!-- Add some custom properties -->
+								<!--<app.version>${project.version}}</app.version>-->
+								<java.version>${java.version}</java.version>
+								<my.custom.property>my custom value</my.custom.property>
+							</additionalProperties>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
+
+
+			<plugin>
+				<groupId>com.github.eirslett</groupId>
+				<artifactId>frontend-maven-plugin</artifactId>
+				<version>${frontend-maven-plugin.version}</version>
+				<configuration>
+					<workingDirectory>ui</workingDirectory>
+					<installDirectory>target</installDirectory>
+				</configuration>
+				<executions>
+					<execution>
+						<id>install node and npm</id>
+						<goals>
+							<goal>install-node-and-npm</goal>
+						</goals>
+						<configuration>
+							<nodeVersion>${node.version}</nodeVersion>
+							<npmVersion>${npm.version}</npmVersion>
+						</configuration>
+					</execution>
+					<execution>
+						<id>npm install</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<arguments>install</arguments>
+						</configuration>
+					</execution>
+					<execution>
+						<id>npm run build</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<arguments>run build</arguments>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>generate-resources</phase>
+						<configuration>
+							<target>
+								<copy todir="${project.build.directory}/classes/public">
+									<fileset dir="${project.basedir}/ui/build" />
+								</copy>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 		</plugins>
 	</build>
 

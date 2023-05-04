@@ -29,6 +29,8 @@ public class BuildgateApplication {
 
 	@EventListener(ApplicationReadyEvent.class)
 	public void afterStartup() {
+		logger.info("App {}-{} using JVM: {}", this.appConfig.appName(), this.appConfig.appVersion(),
+				this.appConfig.appJvmVersion());
 		logger.info("Swagger url: {}", this.appConfig.swaggerUrl());
 		logger.info("Server started at port: {} with url: {}", this.appConfig.port(), this.appConfig.appUrl());
 	}

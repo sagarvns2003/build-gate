@@ -102,8 +102,8 @@ public class JobService {
 	}
 
 	private void prepareDisplayOrder(List<Job> allStatusJobs) {
-		Comparator<Job> statusOrderComparator = Comparator.comparing(Job::getStatus, (job1, job2) -> {
-			return job1.getOrder() - job2.getOrder();
+		Comparator<Job> statusOrderComparator = Comparator.comparing(Job::getStatus, (jobStatus1, jobStatus2) -> {
+			return jobStatus1.getOrder() - jobStatus2.getOrder();
 		});
 		/*
 		 * Comparator<Job> dateComparator = Comparator.comparing(Job::getSubmittedDate,
