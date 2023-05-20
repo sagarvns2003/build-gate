@@ -18,7 +18,7 @@ public class Stage {
 	private int order; // index
 	private String name; // stage name
 	private String command;
-
+	private String description;
 	private ZonedDateTime startDate;
 	private ZonedDateTime endDate;
 	private String runningDuration;

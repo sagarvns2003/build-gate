@@ -49,11 +49,12 @@ public class JobService {
 
 	@PostConstruct
 	public void init() {
-		logger.info("Starting all [{}] threads to execute jobs.", this.jobExecutor.getPoolSize());
-		this.jobExecutor.prestartAllCoreThreads();
+		int totalThreadsStarted = this.jobExecutor.prestartAllCoreThreads();
+		logger.info("Total [{}] threads started to execute the jobs.",
+				totalThreadsStarted /* this.jobExecutor.getPoolSize() */);
 	}
 
-	@Scheduled(initialDelay = 500, fixedRate = 2000)
+	@Scheduled(initialDelay = 100, fixedRate = 2000)
 	public void broadcastJobInformation() {
 		JobInformation jobInformation = this.prepareJobInformation();
 		template.convertAndSend("/topic/message", jobInformation);
@@ -68,7 +69,7 @@ public class JobService {
 		// Get waiting jobs
 		List<Job> remainingQueuedJobs = this.jobQueue.parallelStream().map(this::toJob).toList();
 
-		// This will contain Running, Done, Failed, Cancelled etc...
+		// This will contain Running, Done, Failed, Cancelled jobs etc...
 		List<Job> otherStatusJobs = this.runningJobQueue.parallelStream().map(this::toJob).toList();
 		logger.info("All running/active jobs: {}", this.jobExecutor.getQueue().size());
 
@@ -122,15 +123,47 @@ public class JobService {
 		return jobInfo;
 	}
 
+	public void deleteJob(JobRequest jr) {
+		Job jobInfo = getJobInformation(jr.getJobId());
+		if (jobInfo != null && jobInfo.getStatus() != JobStatus.RUNNING) {
+			if (this.jobExecutor.remove(jobInfo)) {
+				// Job removed from the queue
+				logger.info("Job removed from the queue");
+			} else {
+				// Unable to remove from the queue
+				logger.info("Unable to remove from the queue");
+			}
+		}
+	}
+
+	public void cancelJob(JobRequest jr) {
+		Job jobInfo = getJobInformation(jr.getJobId());
+		if (jobInfo != null) {
+			if (this.jobExecutor.remove(jobInfo)) {
+				jobInfo.setStatus(JobStatus.CANCELLED);
+				this.runningJobQueue.offer(jobInfo);
+				logger.info("Status changed to:{} for the job id:{} and name:{}", jobInfo.getStatus().name(),
+						jobInfo.getJobId(), jobInfo.getJobName());
+			} else {
+				// Unable to remove from the queue
+				logger.info("Unable to cancel the job having job id:{} and name:{} from the queue.", jobInfo.getJobId(),
+						jobInfo.getJobName());
+			}
+		} else {
+			logger.info("Unable to find the job having id:{}", jr.getJobId());
+		}
+	}
+
 	public void enqueueJob(JobRequest jr, WorkFlow workFlow) {
 
 		if (null == workFlow) {
 			// Set default workflow
 			Stage stage1 = Stage.builder().order(1).name("Checkout").command("git clone " + jr.getGitRepoUrl())
-					.status(StageStatus.NOT_STARTED).build();
+					.description("Cloning the git repository.").status(StageStatus.NOT_STARTED).build();
 			Stage stage2 = Stage.builder().order(2).name("Build").command("mvn clean install")
-					.status(StageStatus.NOT_STARTED).build();
-			Stage stage3 = Stage.builder().order(2).name("Deploy").command("mvn releaser:release")
+					.description("Building the artifect.").status(StageStatus.NOT_STARTED).build();
+			Stage stage3 = Stage.builder().order(3).name("Release").command("mvn releaser:release")
+					.description("Releasing the artifect to the maven central repository.")
 					.status(StageStatus.NOT_STARTED).build();
 			workFlow = WorkFlow.builder().stages(List.of(stage1, stage2, stage3)).build();
 		}
@@ -141,16 +174,16 @@ public class JobService {
 				.submitDate(ZonedDateTime.now()).startDate(null).endDate(null).runningDuration("-")
 				.status(JobStatus.QUEUED).build();
 
-		if (!this.jobQueue.contains(job) && !this.runningJobQueue.contains(job)) {
-			if (this.jobQueue.offer(job)) {
-				logger.info("This job: {} is queued successfully.", job.getJobName());
-			} else {
-				logger.warn("Unable to queue this job: {}", job.getJobName());
-			}
-
+		// if (!this.jobQueue.contains(job) && !this.runningJobQueue.contains(job)) {
+		if (this.jobQueue.offer(job)) {
+			logger.info("This job:{} having id:{} is queued successfully.", job.getJobName(), job.getJobId());
 		} else {
-			logger.warn("This job: {} is already in the queue.", job.getJobName());
+			logger.warn("Unable to queue this job:{} having id:{}", job.getJobName(), job.getJobId());
 		}
+
+		// } else {
+		// logger.warn("This job: {} is already in the queue.", job.getJobName());
+		// }
 
 	}
 
@@ -162,7 +195,9 @@ public class JobService {
 			duration = Duration.between(job.getStartDate(), ZonedDateTime.now());
 		} else if (job.getStatus() == JobStatus.DONE || job.getStatus() == JobStatus.CANCELLED
 				|| job.getStatus() == JobStatus.FAILED) {
-			duration = Duration.between(job.getStartDate(), job.getEndDate());
+			if (null != job.getStartDate() && null != job.getEndDate()) {
+				duration = Duration.between(job.getStartDate(), job.getEndDate());
+			}
 		}
 		String runningDuration = JobUtil.prepareRunningDuration(duration);
 

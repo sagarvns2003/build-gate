@@ -1,6 +1,11 @@
 package io.github.sagarvns2003.buildgate.util;
 
 import java.time.Duration;
+import java.util.Objects;
+import java.util.concurrent.BlockingQueue;
+
+import io.github.sagarvns2003.buildgate.model.JobStatus;
+import io.github.sagarvns2003.buildgate.service.Job;
 
 public final class JobUtil {
 
@@ -22,4 +27,15 @@ public final class JobUtil {
 		return runningDuration;
 	}
 
+	public static void changeJobStatus(Job job, final JobStatus status) {
+		if (Objects.nonNull(job)) {
+			job.setStatus(status);
+		}
+	}
+
+	public static  void addJobToProcessedQueue(BlockingQueue<Runnable> processedJobQueue, Job job) {
+		if (Objects.nonNull(job)) {
+			processedJobQueue.add(job);
+		}
+	}
 }

@@ -63,8 +63,12 @@ public class Job implements Runnable {
 
 	@Override
 	public void run() {
+
 		this.startDate = ZonedDateTime.now();
-		this.changeStatus(JobStatus.RUNNING);
+		//this.changeStatus(JobStatus.RUNNING);
+		JobUtil.changeJobStatus(this, JobStatus.RUNNING);
+		JobUtil.addJobToProcessedQueue(this.runningJobQueue, this);
+		
 		try {
 			// this.setStatus("Running");
 			logger.info("Executing: {}, status: {}", jobName, status);
@@ -75,10 +79,11 @@ public class Job implements Runnable {
 			// Collections.sort(stages, Comparator.comparingInt(Stage::getOrder));
 
 			for (Stage stage : stages) {
+
 				stage.setStatus(StageStatus.STARTED);
 				ZonedDateTime startDateTime = ZonedDateTime.now();
 				stage.setStartDate(startDateTime);
-				stage.setLogPath("/tmp/"+this.jobName+"/"+this.jobId+"/stage_"+stage.getName());
+				stage.setLogPath("/tmp/" + this.jobName + "/" + this.jobId + "/stage_" + stage.getName());
 
 				Thread.sleep(15000);
 
@@ -91,26 +96,28 @@ public class Job implements Runnable {
 				stage.setRunningDuration(runningDuration);
 			}
 
-			// logger.info("Execution: {} done.", jobName);
-			// this.status = "Done";
+			logger.info("Execution: {} done.", jobName);
+			this.status = JobStatus.DONE;
 
 		} catch (InterruptedException e) {
-			this.changeStatus(JobStatus.FAILED);
+			//this.changeStatus(JobStatus.FAILED);
+			JobUtil.changeJobStatus(this, JobStatus.FAILED);
 			e.printStackTrace();
 		} finally {
 			this.endDate = ZonedDateTime.now();
 		}
 	}
 
-	private void changeStatus(JobStatus jobStatus) {
-		this.status = jobStatus;
 
-		logger.info("Job status changed to: {}", this.status.name());
-
-		if (!this.runningJobQueue.contains(this)) {
-			logger.info("Job: {} added to running queue.");
-			this.runningJobQueue.add(this);
-		}
-	}
+	/*
+	 * private void changeStatus(JobStatus jobStatus) { this.status = jobStatus;
+	 * logger.info("Status changed to: {} for the job id: {} and name: {}",
+	 * this.status.name(), this.jobId, this.jobName);
+	 * 
+	 * // if (!this.runningJobQueue.contains(this)) { //if (JobStatus.RUNNING ==
+	 * this.status) { this.runningJobQueue.add(this);
+	 * logger.info("Job having id:{}, name:{} added to running queue.", this.jobId,
+	 * this.jobName); //} // } }
+	 */
 
 }

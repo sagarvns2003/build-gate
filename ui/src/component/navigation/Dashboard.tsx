@@ -1,11 +1,10 @@
-import { ActionIcon, Badge, Card, Container, createStyles, Group, Loader, Menu, Notification, Paper, Progress, ScrollArea, Table, Text } from '@mantine/core';
-import { IconAlertTriangle, IconCircleCheck, IconClock, IconDots, IconEye, IconFileZip, IconRun, IconTrash, IconX } from '@tabler/icons';
+import { ActionIcon, Badge, Card, Container, Group, Loader, Menu, Notification, Paper, Progress, ScrollArea, Table, Text, createStyles } from '@mantine/core';
+import { IconAlertTriangle, IconAnalyze, IconCircleCheck, IconCircleX, IconClock, IconDots, IconEye, IconFileZip, IconRun, IconTrash, IconX } from '@tabler/icons';
 import dayjs from 'dayjs';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import SockJsClient from 'react-stomp';
 import { JOB_STATUS } from '../util/BuildStatus';
-import {getMainSocketUrl} from '../../Util';
+import { JOB_ACTION } from '../util/JobAction';
 
 const useStyles = createStyles((theme) => ({
 
@@ -156,6 +155,31 @@ const useStyles = createStyles((theme) => ({
         color: "#d20e0e"
     },
 
+    inner: {
+        display: 'flex',
+        paddingLeft: '0px',
+        [theme.fn.smallerThan('sm')]: {
+            flexDirection: 'column',
+            alignItems: 'center',
+        },
+    },
+
+    actionButtion: {
+        cursor: 'pointer',
+        boxSizing: 'border-box',
+        borderRadius: '0.25rem',
+        padding: '5px',
+        marginRight: '4px',
+        justifyContent: 'center',
+        height: '1.75rem',
+        minHeight: '1.75rem',
+        width: '1.75rem',
+        minWidth: '1.75rem',
+        border: '0.0625rem solid rgb(222, 226, 230)',
+        color: '#495057',
+        backgroundColor: 'rgb(255, 255, 255)'
+    },
+
 }));
 
 const statusColors: Record<string, string> = {
@@ -245,34 +269,15 @@ const buildData = [
     }
 ];
 
-export default function Dashboard() {
+export default function Dashboard({ connectError, message }) {
     const navigate = useNavigate();
     const { classes, theme } = useStyles();
     const [date, setDate] = useState(new Date());
-    const [message, setMessage] = useState(JSON.parse('{"statistics":{"runningCount":0,"queuedCount":0,"doneCount":0,"cancelledCount":0,"failedCount":0},"jobInformation":[]}'));
-    const [error, setError] = useState();
+    //const [message, setMessage] = useState(JSON.parse('{"statistics":{"runningCount":0,"queuedCount":0,"doneCount":0,"cancelledCount":0,"failedCount":0},"jobInformation":[]}'));
+    //const [error, setError] = useState();
 
     const statisticsData = message?.statistics;
     const jobInformation = message?.jobInformation;
-
-
-    let onConnected = () => {
-        console.log("Connected!!")
-        setError(undefined);
-    }
-
-    let onConnectionFailed = (err: any) => {
-        console.log("onConnectionFailed... " + JSON.stringify(err))
-        setError(err);
-    }
-
-    let onMessageReceived = (msg: any) => {
-        //console.log("onMessageReceived... " + JSON.stringify(msg))
-        setMessage(msg);
-        console.log("onMessageReceived... " + JSON.stringify(message))
-    }
-
-
 
     //Prepare stats data
     const statsData = [
@@ -294,13 +299,18 @@ export default function Dashboard() {
         </Paper>
     ));
 
-    //const rows = buildData.map((row) => {
     const rows = jobInformation.map((row: any) => {
+
+        function deleteJob(jobId: string, action: JOB_ACTION): void {
+            //Rest call from here
+            console.log(jobId, action);
+        }
 
         let submitDate = dayjs(row.submitDate).format("hh:mm:ss A").toString();
         let startDate = row.startDate ? dayjs(row.startDate).format("hh:mm:ss A").toString() : "-";
 
         let totalReviews = 0, positiveReviews = 0, negativeReviews = 0;
+
         //console.log(row.status);
         //console.log(BUILD_STATUS.RUNNING);
         /* if (row.status === BUILD_STATUS.RUNNING) {
@@ -310,9 +320,16 @@ export default function Dashboard() {
          }*/
 
         return (
-            <tr key={row.jobId} id={row.jobId} onClick={(event) => navigate("/build/status/" + event.currentTarget.id)} style={{ cursor: "pointer" }}>
-                {/* <td> <Anchor<'a'> id={row.jobId} size="sm">{row.jobId}</Anchor> </td> */}
-                <td><Text size="md" weight={500} color={'#0d6dc1'}>{row.jobName}</Text></td>
+            <tr key={row.jobId}>
+                {/* <td><Anchor<'a'> id={row.jobId} size="md" color={'#0d6dc1'}>{row.jobName}</Anchor> </td> */}
+                <td>
+                    <Container className={classes.inner}>
+                        <IconAnalyze color={'#0d6dc1'} style={{ marginRight: "6px" }} />
+                        <Text style={{ cursor: "pointer" }} size="md" weight={500} color={'#0d6dc1'} id={row.jobId} onClick={(event) => navigate("/build/status/" + event.currentTarget.id)}>
+                            {row.jobName}
+                        </Text>
+                    </Container>
+                </td>
                 <td><Text size="sm">{submitDate}</Text></td>
                 <td><Text size="sm">{startDate}</Text></td>
                 <td><Text size="sm">{row.runningDuration}</Text></td>
@@ -325,11 +342,15 @@ export default function Dashboard() {
                                 </Text>
                             </Group>
                             <Progress classNames={{ bar: classes.progressBar }} value={75} label="75%" size="xl" radius="xl" />
-                          </>
+                        </>
                         : <Badge color={statusColors[row.status.toLowerCase()]} variant={theme.colorScheme === 'dark' ? 'light' : 'outline'} >
                             {row.status}
-                          </Badge>
+                        </Badge>
                     }
+                </td>
+                <td>
+                    <IconTrash className={classes.actionButtion} id={row.jobId} size={18} onClick={(event) => deleteJob(event.currentTarget.id, JOB_ACTION.DELETE)} />
+                    <IconCircleX className={classes.actionButtion} id={row.jobId} size={18} onClick={(event) => deleteJob(event.currentTarget.id, JOB_ACTION.CANCEL)} />
                 </td>
             </tr>
         );
@@ -340,20 +361,11 @@ export default function Dashboard() {
     return (
         <Container className={classes.mainContainer}>
 
-            <SockJsClient
-                url={getMainSocketUrl}
-                topics={['/topic/message']}
-                onConnect={onConnected}
-                onConnectFailure={(err: any) => onConnectionFailed(err)}
-                onDisconnect={console.log("Disconnected!")}
-                onMessage={(msg: any) => onMessageReceived(msg)}
-                debug={false}
-            />
             {/* <div>{JSON.stringify(message)}</div>
             <br /> */}
 
-            {error && error !== ""
-                ? <><Notification icon={<IconX size={18} />} color="red" title="Connection error">{error}</Notification><br /></>
+            {connectError && connectError !== ""
+                ? <><Notification icon={<IconX size={18} />} color="red" title="Connection error">{connectError}</Notification><br /></>
                 : ""
             }
 
@@ -396,11 +408,12 @@ export default function Dashboard() {
                         <Table sx={{ minWidth: 800 }} verticalSpacing="sm" highlightOnHover={true} frame={true}>
                             <thead>
                                 <tr>
-                                    <th style={{ width: "400px" }}>Name</th>
+                                    <th style={{ width: "460px" }}>Name</th>
                                     <th style={{ width: "130px" }}>Submit Time</th>
                                     <th style={{ width: "130px" }}>Start Time</th>
                                     <th style={{ width: "130px" }}>Duration</th>
                                     <th style={{ width: "250px" }}>Status</th>
+                                    <th style={{ width: "60" }}>Action</th>
                                 </tr>
                             </thead>
                             <tbody>{rows}</tbody>

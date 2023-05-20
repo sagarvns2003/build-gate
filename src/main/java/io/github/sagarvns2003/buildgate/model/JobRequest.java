@@ -14,6 +14,7 @@ import lombok.EqualsAndHashCode;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class JobRequest {
 
+	private String jobId;
 	private String jobName;
 	private String gitRepoUrl;
 	private String branch;

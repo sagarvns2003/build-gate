@@ -18,6 +18,14 @@ public class JobManager {
 		this.jobService.enqueueJob(jr, null);
 	}
 
+	public void deleteJob(JobRequest jobRequest) {
+		this.jobService.deleteJob(jobRequest);
+	}
+
+	public void cancelJob(JobRequest jr) {
+		this.jobService.cancelJob(jr);
+	}
+
 	public JobInformation getAllJobInformation() {
 		return this.jobService.getAllJobInformation();
 	}

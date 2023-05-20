@@ -10,7 +10,9 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,6 +39,18 @@ public class JobController {
 		logger.info("Submitting job...");
 		this.jobManager.enqueueJob(jobRequest);
 		return new ResponseEntity("Added", HttpStatus.OK);
+	}
+	
+	@DeleteMapping(value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> deleteJob(@RequestBody JobRequest jobRequest) {
+		this.jobManager.deleteJob(jobRequest);
+		return new ResponseEntity("Deleted", HttpStatus.OK);
+	}
+	
+	@PatchMapping(value = "/cancel", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> cancelJob(@RequestBody JobRequest jobRequest) {
+		this.jobManager.cancelJob(jobRequest);
+		return new ResponseEntity("Cancelled", HttpStatus.OK);
 	}
 
 	@GetMapping(value = "/info", produces = MediaType.APPLICATION_JSON_VALUE)

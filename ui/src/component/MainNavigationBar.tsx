@@ -1,14 +1,14 @@
-import { useState } from "react";
-import { Navbar, useMantineTheme, Group, Code, ScrollArea, createStyles, rem } from '@mantine/core';
+import { Navbar, ScrollArea, createStyles, rem, useMantineTheme } from '@mantine/core';
 import {
-  IconNotes,
-  IconCalendarStats,
-  IconLayoutDashboard,
-  IconPresentationAnalytics,
-  IconFileAnalytics,
   IconAdjustments,
+  IconCalendarStats,
+  IconFileAnalytics,
+  IconLayoutDashboard,
   IconLock,
+  IconNotes,
+  IconPresentationAnalytics,
 } from '@tabler/icons';
+import { useState } from "react";
 
 import { LinksGroup } from "./NavbarLinksGroup";
 import { UserButton } from "./UserButton";
@@ -59,9 +59,8 @@ const useStyles = createStyles((theme) => ({
     marginLeft: `calc(${theme.spacing.md} * -1)`,
     marginRight: `calc(${theme.spacing.md} * -1)`,
     color: theme.colorScheme === 'dark' ? theme.white : theme.black,
-    borderBottom: `${rem(1)} solid ${
-      theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]
-    }`,
+    borderBottom: `${rem(1)} solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]
+      }`,
   },
 
   links: {
@@ -81,7 +80,7 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-export default function MainNavigationBar() {
+export default function MainNavigationBar({ appinfo }) {
 
   const { classes } = useStyles();
   const links = menuData.map((item) => <LinksGroup {...item} key={item.label} />);
@@ -89,11 +88,11 @@ export default function MainNavigationBar() {
   const [opened, setOpened] = useState(false);
 
   return (
-    <Navbar p="md" hiddenBreakpoint="sm" hidden={!opened} width={{ sm: 200, lg: 300 }} style={{ paddingLeft: '16px', paddingRight: '16px' }}>
+    <Navbar p="xs" hiddenBreakpoint="sm" hidden={!opened} width={{ base: 300 }} style={{ paddingLeft: '25px', paddingRight: '26px' }}>
 
       <Navbar.Section className={classes.user} >
         <UserButton
-          image="https://media-exp1.licdn.com/dms/image/C5103AQFR8h2Px6ji0w/profile-displayphoto-shrink_400_400/0/1543131915690?e=1667433600&v=beta&t=KK24DOUUPJXSdphMqeditJKZ_d6R8nSbBO1TszgLqq4&auto=format&fit=crop&w=255&q=80"
+          image="https://media.licdn.com/dms/image/C5103AQFR8h2Px6ji0w/profile-displayphoto-shrink_400_400/0/1543131915690?e=1689206400&v=beta&t=Gr_bquXxzOf-zWNPgEGeN9PKzV5KIwpm6SNjGOKLjOo"
           name="Vidya Sagar Gupta"
           email="v3sagar@gmail.com"
         />
@@ -102,15 +101,6 @@ export default function MainNavigationBar() {
       <Navbar.Section grow className={classes.links} component={ScrollArea}>
         <div className={classes.linksInner}>{links}</div>
       </Navbar.Section>
-
-
-      <Navbar.Section className={classes.header}>
-        <Group position="apart">
-          {/* <Logo width={120} /> */}
-          <Code sx={{ fontWeight: 700 }}>v3.1.2</Code>
-        </Group>
-      </Navbar.Section>
-
 
     </Navbar>
   );

@@ -36,7 +36,6 @@ public class JobExecutor extends ThreadPoolExecutor {
 			job.setStatus(JobStatus.FAILED);
 			logger.info("Perform exception handler logic");
 		}
-		job.setStatus(JobStatus.DONE);
-		logger.info("Perform afterExecute() logic for {}, new Status: {}", job.getJobName(), job.getStatus());
+		logger.info("Performed afterExecute() logic for {}, new Status: {}", job.getJobName(), job.getStatus());
 	}
 }
